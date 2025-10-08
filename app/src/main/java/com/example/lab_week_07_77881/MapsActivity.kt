@@ -20,6 +20,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import kotlin.getValue
 import com.google.android.gms.location.LocationServices
+import com.example.lab_week_07_77881.R
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
