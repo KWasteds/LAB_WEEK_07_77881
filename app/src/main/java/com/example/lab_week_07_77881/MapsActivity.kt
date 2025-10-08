@@ -18,6 +18,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.location.Location
+import kotlin.getValue
+import com.google.android.gms.location.LocationServices
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -52,6 +54,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
     }
 
+
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -76,7 +80,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun getLastLocation() {
-        Log.d("MapsActivity", "getLastLocation() called.")
+        if (hasLocationPermission()) {
+            try {
+                fusedLocationProviderClient.lastLocation
+                    .addOnSuccessListener { location: Location? ->
+                        location?.let {
+                            val userLocation = LatLng(location.latitude,
+                                location.longitude)
+                            updateMapLocation(userLocation)
+                            addMarkerAtLocation(userLocation, "You")
+                        }
+                    }
+            } catch (e: SecurityException) {
+                Log.e("MapsActivity", "SecurityException: ${e.message}")
+            }
+        } else {
+            // If permission was rejected
+            requestPermissionLauncher.launch(ACCESS_FINE_LOCATION)
+        }
+    }
+
+    private val fusedLocationProviderClient by lazy {
+        LocationServices.getFusedLocationProviderClient(this)
+    }
+
+    private fun updateMapLocation(location: LatLng) {
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+            location, 7f))
+    }
+    private fun addMarkerAtLocation(location: LatLng, title: String) {
+        mMap.addMarker(MarkerOptions().title(title)
+            .position(location))
     }
 
     private fun showPermissionRationale(positiveAction: () -> Unit) {
